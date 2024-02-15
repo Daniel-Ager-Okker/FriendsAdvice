@@ -9,6 +9,7 @@ import (
 type IStorageManager interface {
 	PutData(data *model.Data) bool
 	GetData(dataID uint) *model.Data
+	IsReady() bool
 	Terminate() (bool, error)
 }
 
@@ -17,8 +18,7 @@ type Controller struct {
 }
 
 func (c *Controller) IsStorageReady() bool {
-	// TODO
-	return true
+	return c.storageManager.IsReady()
 }
 
 func (c *Controller) PutObject(key int, value string) bool {

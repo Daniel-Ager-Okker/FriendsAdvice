@@ -5,6 +5,9 @@ import (
 	"FriendsAdvice/internal/services"
 	"database/sql"
 	"fmt"
+	"log"
+
+	_ "github.com/lib/pq"
 )
 
 // An implementation of IStorageManager interface for work with database
@@ -45,6 +48,16 @@ func (pManager *StorageManager) GetData(dataID uint) *model.Data {
 	}
 }
 
+// StorageManager method for answer the question of it is ready
+func (pManager *StorageManager) IsReady() bool {
+	if pManager.dataBase == nil {
+		return false
+	}
+
+	err := pManager.dataBase.Ping()
+	return err == nil
+}
+
 // Function for right termination while service down
 func (pManager *StorageManager) Terminate() (bool, error) {
 	// Need to move all objects from RAM to DB and close connection
@@ -82,7 +95,28 @@ func InitManager(connectionInfo *ConnectionDTO) (services.IStorageManager, error
 }
 
 func (pManager *StorageManager) getDataFromDB() {
-	//TODO
+	rows, err := pManager.dataBase.Query("SELECT * FROM Grades")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var (
+		id            uint
+		establishment string
+		subject       model.SubjectType
+		knowlegdeTest model.KnowlegdeTestType
+		grade         model.GradeType
+	)
+
+	for rows.Next() {
+		err := rows.Scan(&id, &establishment, &subject, &knowlegdeTest, &grade)
+		if err != nil {
+			return
+		}
+		data := model.Data{ID: id, Establishment: establishment, Subject: subject, Grade: grade}
+		pManager.storage[id] = &data
+	}
 }
 
 func (pManager *StorageManager) updateDataBase() bool {
