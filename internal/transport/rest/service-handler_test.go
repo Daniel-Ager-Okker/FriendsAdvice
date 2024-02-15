@@ -8,6 +8,20 @@ import (
 	"testing"
 )
 
+func TestGetInvalidKey(t *testing.T) {
+	r := CreateRouter(&services.Controller{})
+	ts := httptest.NewServer(r.MuxRouter)
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL + "/objects/abc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.StatusCode != http.StatusBadRequest {
+		t.Errorf("Status code for /GET/ is wrong. Have: %d, want: %d.", res.StatusCode, http.StatusBadRequest)
+	}
+}
+
 func TestGet(t *testing.T) {
 	r := CreateRouter(&services.Controller{})
 	ts := httptest.NewServer(r.MuxRouter)
@@ -22,7 +36,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestPut(t *testing.T) {
+func TestPutInvalidKey(t *testing.T) {
 	r := CreateRouter(&services.Controller{})
 	ts := httptest.NewServer(r.MuxRouter)
 	defer ts.Close()
@@ -44,7 +58,7 @@ func TestPut(t *testing.T) {
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		t.Errorf("Status code for /PUT/objects/AnyKey is wrong. Have: %d, want: %d.", res.StatusCode, http.StatusOK)
+	if res.StatusCode != http.StatusBadRequest {
+		t.Errorf("Status code for /PUT/objects/AnyKey is wrong. Have: %d, want: %d.", res.StatusCode, http.StatusBadRequest)
 	}
 }

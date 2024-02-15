@@ -15,8 +15,15 @@ func Put(controller transport.IController) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// 1.Take key
 		vars := mux.Vars(r)
-		key := vars["key"]
-		if len(key) == 0 {
+		keyStr := vars["key"]
+		if len(keyStr) == 0 {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusBadRequest)
+			return
+		}
+
+		key := -1
+		var err error = nil
+		if key, err = strconv.Atoi(keyStr); err != nil {
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusBadRequest)
 			return
 		}
@@ -61,8 +68,15 @@ func Get(controller transport.IController) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// 1.Take key
 		vars := mux.Vars(r)
-		key := vars["key"]
-		if len(key) == 0 {
+		keyStr := vars["key"]
+		if len(keyStr) == 0 {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusBadRequest)
+			return
+		}
+
+		key := -1
+		var err error = nil
+		if key, err = strconv.Atoi(keyStr); err != nil {
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusBadRequest)
 			return
 		}
@@ -71,7 +85,7 @@ func Get(controller transport.IController) http.HandlerFunc {
 		obj, haveObject := controller.GetObject(key)
 		if haveObject {
 			w.Write([]byte(obj))
-			fmt.Printf("Object is %s, key is %s", obj, key)
+			fmt.Printf("Object is %s, key is %d", obj, key)
 		} else {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		}

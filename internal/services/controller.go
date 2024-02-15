@@ -21,17 +21,17 @@ func (c *Controller) IsStorageReady() bool {
 	return true
 }
 
-func (c *Controller) PutObject(key, value string) bool {
+func (c *Controller) PutObject(key int, value string) bool {
 	// TODO
 	return true
 }
 
-func (c *Controller) PutObjectWithExpires(key, value string, lifetime time.Duration) bool {
+func (c *Controller) PutObjectWithExpires(key int, value string, lifetime time.Duration) bool {
 	// TODO
 	return true
 }
 
-func (c *Controller) GetObject(key string) (string, bool) {
+func (c *Controller) GetObject(key int) (string, bool) {
 	// TODO
 	return "ah", true
 }
