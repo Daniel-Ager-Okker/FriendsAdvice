@@ -31,6 +31,11 @@ func (c *Controller) PutObjectWithExpires(key, value string, lifetime time.Durat
 	return true
 }
 
+func (c *Controller) GetObject(key string) (string, bool) {
+	// TODO
+	return "ah", true
+}
+
 func InitController(storeManager IStorageManager) transport.IController {
 	controller := Controller{storageManager: storeManager}
 	return &controller

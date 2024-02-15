@@ -25,6 +25,6 @@ func initRouter(r *Router) {
 	r.MuxRouter.HandleFunc("/probes/readiness", Readiness(r.controller)).Methods("GET")
 
 	// Reading objects from storage
-	r.MuxRouter.HandleFunc("/objects/key", Put(r.controller)).Methods("PUT")
-	// r.MuxRouter.HandleFunc("/objects/{key:[0-999999]+}", Get(r.MuxRouter)).Methods("GET")
+	r.MuxRouter.HandleFunc("/objects/{key}", Put(r.controller)).Methods("PUT")
+	r.MuxRouter.HandleFunc("/objects/{key}", Get(r.controller)).Methods("GET")
 }

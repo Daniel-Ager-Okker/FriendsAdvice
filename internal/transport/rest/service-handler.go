@@ -2,6 +2,7 @@ package rest
 
 import (
 	"FriendsAdvice/internal/transport"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -52,6 +53,27 @@ func Put(controller transport.IController) http.HandlerFunc {
 			} else {
 				http.Error(w, http.StatusText(http.StatusFound), http.StatusFound)
 			}
+		}
+	}
+}
+
+func Get(controller transport.IController) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// 1.Take key
+		vars := mux.Vars(r)
+		key := vars["key"]
+		if len(key) == 0 {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusBadRequest)
+			return
+		}
+
+		// 2.Get object due to controller
+		obj, haveObject := controller.GetObject(key)
+		if haveObject {
+			w.Write([]byte(obj))
+			fmt.Printf("Object is %s, key is %s", obj, key)
+		} else {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		}
 	}
 }
