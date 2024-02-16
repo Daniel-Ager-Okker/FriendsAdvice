@@ -2,6 +2,7 @@ package model
 
 type Data struct {
 	ID            uint
+	Pupil         string
 	Establishment string
 	Subject       SubjectType
 	KnowlegdeTest KnowlegdeTestType

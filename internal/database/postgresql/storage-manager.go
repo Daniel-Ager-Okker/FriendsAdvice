@@ -103,6 +103,7 @@ func (pManager *StorageManager) getDataFromDB() {
 
 	var (
 		id            uint
+		pupil         string
 		establishment string
 		subject       model.SubjectType
 		knowlegdeTest model.KnowlegdeTestType
@@ -110,11 +111,16 @@ func (pManager *StorageManager) getDataFromDB() {
 	)
 
 	for rows.Next() {
-		err := rows.Scan(&id, &establishment, &subject, &knowlegdeTest, &grade)
+		err = rows.Scan(&id, &pupil, &establishment, &subject, &knowlegdeTest, &grade)
 		if err != nil {
 			return
 		}
-		data := model.Data{ID: id, Establishment: establishment, Subject: subject, Grade: grade}
+		data := model.Data{ID: id,
+			Pupil:         pupil,
+			Establishment: establishment,
+			Subject:       subject,
+			KnowlegdeTest: knowlegdeTest,
+			Grade:         grade}
 		pManager.storage[id] = &data
 	}
 }
