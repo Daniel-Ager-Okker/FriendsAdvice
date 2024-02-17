@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"FriendsAdvice/internal/database/postgresql"
 	"FriendsAdvice/internal/services"
 	"net/http"
 	"net/http/httptest"
@@ -22,7 +23,10 @@ func TestLiveness(t *testing.T) {
 }
 
 func TestReadiness(t *testing.T) {
-	r := CreateRouter(&services.Controller{})
+	storageManager, _ := postgresql.InitManager(createConnectionDTO())
+	controller := services.InitController(storageManager)
+
+	r := CreateRouter(controller)
 	ts := httptest.NewServer(r.MuxRouter)
 	defer ts.Close()
 
@@ -33,4 +37,13 @@ func TestReadiness(t *testing.T) {
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("Status code for /probes/readiness is wrong. Have: %d, want: %d.", res.StatusCode, http.StatusOK)
 	}
+}
+
+func createConnectionDTO() *postgresql.ConnectionDTO {
+	return &postgresql.ConnectionDTO{
+		HostName: "172.25.32.1",
+		User:     "postgres",
+		Password: "postgres",
+		Port:     "5432",
+		DBName:   "postgres"}
 }
