@@ -4,6 +4,7 @@ import (
 	model "FriendsAdvice/internal/data-model"
 	"FriendsAdvice/internal/services"
 	"testing"
+	"time"
 )
 
 // Unfortunately, you may test this module only while have deployed database in docker container
@@ -48,27 +49,109 @@ func TestInitManager(t *testing.T) {
 func checkDefaultData(t *testing.T, storageManager services.IStorageManager) {
 	// Daniel
 	var dataDaniel *model.Data = storageManager.GetData(DANIEL_KEY)
-	if !checkData(dataDaniel, "AMTEK", model.Physics, model.Test, 5) {
+	if !checkData(dataDaniel, "Daniel", "AMTEK", model.Eleven, model.LetterA) {
 		t.Errorf("Daniel's default data is wrong!")
 	}
 
 	// Maria
 	var dataMaria *model.Data = storageManager.GetData(MARIA_KEY)
-	if !checkData(dataMaria, "School 26", model.English, model.Work, 4) {
+	if !checkData(dataMaria, "Maria", "School 26", model.Ten, model.LetterA) {
 		t.Errorf("Maria's default data is wrong!")
 	}
 
 	// Zima
 	var dataZima *model.Data = storageManager.GetData(ZIMA_KEY)
-	if !checkData(dataZima, "School 17", model.Mathematics, model.Quarter, 2) {
+	if !checkData(dataZima, "Zima", "School 17", model.Ten, model.LetterV) {
 		t.Errorf("Maria's default data is wrong!")
 	}
 }
 
-func checkData(data *model.Data, e string, s model.SubjectType, c model.KnowlegdeTestType, g model.GradeType) bool {
-	cond1 := data.Establishment == e
-	cond2 := data.Subject == s
-	cond3 := data.KnowlegdeTest == c
-	cond4 := data.Grade == g
+func checkData(data *model.Data, p, e string, c model.ClassType, l model.LetterType) bool {
+	cond1 := data.Pupil == p
+	cond2 := data.Establishment == e
+	cond3 := data.Class == c
+	cond4 := data.Letter == l
 	return cond1 && cond2 && cond3 && cond4
+}
+
+func TestPutData(t *testing.T) {
+	storageManager, _ := InitManager(makeTestConnectionDTO())
+
+	// some valid (means "new") UserData
+	data := model.Data{ID: 4,
+		Pupil:         "Antonio",
+		Establishment: "AMTEK",
+		Class:         model.Nine,
+		Letter:        model.LetterA}
+	added := storageManager.PutData(&data)
+	if !added {
+		t.Errorf("Newly created data put FAILED. Have: %v, want: %v.", added, true)
+	}
+
+	addedAgain := storageManager.PutData(&data)
+	if addedAgain {
+		t.Errorf("Existing data put FAILED. Have: %v, want: %v.", addedAgain, false)
+	}
+}
+
+func TestExpires(t *testing.T) {
+	storageManager, _ := InitManager(makeTestConnectionDTO())
+
+	// some valid (means "new") UserData
+	data := model.Data{ID: 7,
+		Pupil:         "Karen",
+		Establishment: "School 37",
+		Class:         model.Five,
+		Letter:        model.LetterB}
+	added := storageManager.PutDataWithExpires(&data, time.Now())
+	if !added {
+		t.Errorf("Newly created data put FAILED. Have: %v, want: %v.", added, true)
+	}
+
+	gotData := storageManager.GetData(data.ID)
+	if gotData != nil {
+		t.Errorf("Expired data got, but should no!")
+	}
+}
+
+func TestGetData(t *testing.T) {
+	storageManager, _ := InitManager(makeTestConnectionDTO())
+
+	// Try to get non-existen data
+	dataNonExisten := storageManager.GetData(500)
+	if dataNonExisten != nil {
+		t.Errorf("Non-existen data get FAILED. Have: %v, want: nil.", dataNonExisten)
+	}
+
+	// Put some valid data
+	data := model.Data{ID: 4,
+		Pupil:         "Antonio",
+		Establishment: "AMTEK",
+		Class:         model.Nine,
+		Letter:        model.LetterA}
+	storageManager.PutData(&data)
+
+	// Try to get it
+	gotData := storageManager.GetData(data.ID)
+	if gotData == nil {
+		t.Errorf("Existing data get FAILED. Have: %v.", gotData)
+	}
+}
+
+func TestTerminate(t *testing.T) {
+	storageManager, _ := InitManager(makeTestConnectionDTO())
+
+	// need to put some valid data and terminate manager
+	// after that you should check database state manually
+	storageManager.PutData(&model.Data{4, "Antonio", "AMTEK", model.Nine, model.LetterA})
+	storageManager.PutData(&model.Data{5, "Olga", "School 26", model.Ten, model.LetterA})
+
+	terminated, err := storageManager.Terminate()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !terminated {
+		t.Errorf("Something wrong while terminating")
+	}
 }

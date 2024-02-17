@@ -7,6 +7,7 @@ import (
 )
 
 type IStorageManager interface {
+	PutDataWithExpires(data *model.Data, whenDelete time.Time) bool
 	PutData(data *model.Data) bool
 	GetData(dataID uint) *model.Data
 	IsReady() bool

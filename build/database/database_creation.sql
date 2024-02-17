@@ -1,25 +1,20 @@
-CREATE TYPE SUBJECT AS ENUM
-    ('Russian', 'Mathematics', 'Physics', 'Literature', 'English', 'History', 'Technology');
-
-CREATE TYPE TYPETEST AS ENUM
-    ('Annual test', 'Quarter test', 'Test', 'Independent work', 'Answer to the board');
+CREATE TYPE LETTER AS ENUM
+    ('A', 'B', 'V');
 
 --Table for currencies
-CREATE TABLE Grades (
-    id              SERIAL PRIMARY KEY,
-    pupil           VARCHAR NOT NULL,
-    establishment   VARCHAR NOT NULL,
-	subj            SUBJECT NOT NULL,
-	knowlegde_check TYPETEST NOT NULL,
-	grade           NUMERIC(5) NOT NULL
+CREATE TABLE Pupils (
+    id            SERIAL PRIMARY KEY,
+    pupil         VARCHAR NOT NULL,
+    establishment VARCHAR NOT NULL,
+    class_num     NUMERIC(11) NOT NULL,
+	letter        LETTER NOT NULL
 );
 
 
-
 --Simulating some data in the database
-INSERT INTO Grades (id, pupil, establishment, subj, knowlegde_check, grade)
+INSERT INTO Pupils (id, pupil, establishment, class_num, letter)
 VALUES
-    (1, 'Daniel', 'AMTEK', 'Physics', 'Test', 5),
-    (2, 'Maria', 'School 26', 'English', 'Independent work', 4),
-    (3, 'Zima', 'School 17', 'Mathematics', 'Quarter test', 2);
+    (1, 'Daniel', 'AMTEK', 11, 'A'),
+    (2, 'Maria', 'School 26', 10, 'A'),
+    (3, 'Zima', 'School 17', 10, 'V');
 ----------------------
