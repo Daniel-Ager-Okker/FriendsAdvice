@@ -2,7 +2,6 @@ package services
 
 import (
 	model "FriendsAdvice/internal/data-model"
-	transport "FriendsAdvice/internal/transport"
 	"encoding/json"
 	"time"
 )
@@ -57,7 +56,7 @@ func (c *Controller) GetObject(key uint64) ([]byte, bool) {
 	return obj, true
 }
 
-func InitController(storeManager IStorageManager) transport.IController {
+func InitController(storeManager IStorageManager) *Controller {
 	controller := Controller{storageManager: storeManager}
 	return &controller
 }

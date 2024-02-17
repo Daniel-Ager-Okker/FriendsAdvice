@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	model "FriendsAdvice/internal/data-model"
-	"FriendsAdvice/internal/services"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -117,7 +116,7 @@ func (pManager *StorageManager) removeData(ID uint64) {
 }
 
 // Function for create StorageManager enitity in according with possible data in the database
-func InitManager(connectionInfo *ConnectionDTO) (services.IStorageManager, error) {
+func InitManager(connectionInfo *ConnectionDTO) (*StorageManager, error) {
 	// 1.First step - try to open database
 	pDataBase, err := sql.Open("postgres", getOpenConnectionStatement(connectionInfo))
 	if err != nil {
