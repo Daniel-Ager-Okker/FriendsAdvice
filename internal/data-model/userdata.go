@@ -1,14 +1,14 @@
 package model
 
 type Data struct {
-	ID            uint
-	Pupil         string
-	Establishment string
-	Class         ClassType
-	Letter        LetterType
+	ID            uint64     `json:"id"`
+	Pupil         string     `json:"pupil"`
+	Establishment string     `json:"establishment"`
+	Class         ClassType  `json:"class"`
+	Letter        LetterType `json:"letter"`
 }
 
-func (ud *Data) HashKey() uint {
+func (ud *Data) HashKey() uint64 {
 	return ud.ID
 }
 

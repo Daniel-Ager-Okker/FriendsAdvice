@@ -4,6 +4,7 @@ import (
 	model "FriendsAdvice/internal/data-model"
 	"FriendsAdvice/internal/services"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -14,32 +15,32 @@ import (
 
 // An implementation of IStorageManager interface for work with database
 type StorageManager struct {
-	storage     map[uint]*model.Data
+	storage     map[uint64]*model.Data
 	deleteInfo  treemap.Map
-	keysBuffer  []uint
-	bufferLimit uint
+	keysBuffer  []uint64
+	bufferLimit uint64
 	dataBase    *sql.DB
 }
 
 // StorageManager method for put data with expires object into the RAM and update DB if need
-func (pManager *StorageManager) PutDataWithExpires(data *model.Data, whenDelete time.Time) bool {
-	dataPut := pManager.PutData(data)
+func (pManager *StorageManager) PutDataWithExpires(data *model.Data, whenDelete time.Time) (bool, error) {
+	dataPut, err := pManager.PutData(data)
 	if !dataPut {
-		return false
+		return false, err
 	}
 
 	pManager.deleteInfo.Put(whenDelete, data.ID)
 
 	// 4. Handle expired
 	pManager.handleExpired()
-	return true
+	return true, nil
 }
 
 // StorageManager method for put data object into the RAM and update DB if need
-func (pManager *StorageManager) PutData(data *model.Data) bool {
+func (pManager *StorageManager) PutData(data *model.Data) (bool, error) {
 	// 1.Check if data with such ID already exists
 	if _, exists := pManager.storage[data.ID]; exists {
-		return false
+		return false, errors.New("Already have such key in storage")
 	}
 
 	// 2.Put into the RAM and update keysBuffer
@@ -48,18 +49,18 @@ func (pManager *StorageManager) PutData(data *model.Data) bool {
 
 	// 3.Update databse if it is necessary
 	if len(pManager.keysBuffer) == int(pManager.bufferLimit) {
-		dbUpdated, _ := pManager.updateDataBase()
-		pManager.keysBuffer = make([]uint, 0)
-		return dbUpdated
+		dbUpdated, err := pManager.updateDataBase()
+		pManager.keysBuffer = make([]uint64, 0)
+		return dbUpdated, err
 	}
 
 	// 4. Handle expired
 	pManager.handleExpired()
-	return true
+	return true, nil
 }
 
 // StorageManager method for get data object by its ID
-func (pManager *StorageManager) GetData(dataID uint) *model.Data {
+func (pManager *StorageManager) GetData(dataID uint64) *model.Data {
 	// Handle expired
 	pManager.handleExpired()
 
@@ -103,11 +104,11 @@ func (pManager *StorageManager) handleExpired() {
 	lowerBoundIdx := lowerBound(keys, 0, len(keys), now)
 	for i := 0; i < lowerBoundIdx; i++ {
 		idForDelete, _ := pManager.deleteInfo.Get(keys[i].(time.Time))
-		pManager.removeData(idForDelete.(uint))
+		pManager.removeData(idForDelete.(uint64))
 	}
 }
 
-func (pManager *StorageManager) removeData(ID uint) {
+func (pManager *StorageManager) removeData(ID uint64) {
 	// Remove from RAM
 	delete(pManager.storage, ID)
 
@@ -131,9 +132,9 @@ func InitManager(connectionInfo *ConnectionDTO) (services.IStorageManager, error
 	}
 
 	// 3.Get data from DB to the RAM
-	manager := StorageManager{storage: make(map[uint]*model.Data),
+	manager := StorageManager{storage: make(map[uint64]*model.Data),
 		deleteInfo:  *treemap.NewWith(TimesComparator),
-		keysBuffer:  make([]uint, 0),
+		keysBuffer:  make([]uint64, 0),
 		bufferLimit: 30,
 		dataBase:    pDataBase}
 	manager.getDataFromDB()
@@ -150,7 +151,7 @@ func (pManager *StorageManager) getDataFromDB() {
 	defer rows.Close()
 
 	var (
-		id            uint
+		id            uint64
 		pupil         string
 		establishment string
 		classNum      model.ClassType
@@ -196,8 +197,8 @@ func insertDataValuesToDB(data *model.Data, db *sql.DB) (bool, error) {
 }
 
 // Function for determinate query rows size
-func getRowsCount(rows *sql.Rows) uint {
-	var size uint = 0
+func getRowsCount(rows *sql.Rows) uint64 {
+	var size uint64 = 0
 	for rows.Next() {
 		size++
 	}

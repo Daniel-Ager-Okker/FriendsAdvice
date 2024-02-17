@@ -20,9 +20,9 @@ const (
 	port     string = "5432"
 	dbname   string = "postgres"
 
-	DANIEL_KEY uint = 1
-	MARIA_KEY  uint = 2
-	ZIMA_KEY   uint = 3
+	DANIEL_KEY uint64 = 1
+	MARIA_KEY  uint64 = 2
+	ZIMA_KEY   uint64 = 3
 )
 
 func makeTestConnectionDTO() *ConnectionDTO {
@@ -83,12 +83,12 @@ func TestPutData(t *testing.T) {
 		Establishment: "AMTEK",
 		Class:         model.Nine,
 		Letter:        model.LetterA}
-	added := storageManager.PutData(&data)
+	added, _ := storageManager.PutData(&data)
 	if !added {
 		t.Errorf("Newly created data put FAILED. Have: %v, want: %v.", added, true)
 	}
 
-	addedAgain := storageManager.PutData(&data)
+	addedAgain, _ := storageManager.PutData(&data)
 	if addedAgain {
 		t.Errorf("Existing data put FAILED. Have: %v, want: %v.", addedAgain, false)
 	}
@@ -103,7 +103,7 @@ func TestExpires(t *testing.T) {
 		Establishment: "School 37",
 		Class:         model.Five,
 		Letter:        model.LetterB}
-	added := storageManager.PutDataWithExpires(&data, time.Now())
+	added, _ := storageManager.PutDataWithExpires(&data, time.Now())
 	if !added {
 		t.Errorf("Newly created data put FAILED. Have: %v, want: %v.", added, true)
 	}
@@ -143,8 +143,17 @@ func TestTerminate(t *testing.T) {
 
 	// need to put some valid data and terminate manager
 	// after that you should check database state manually
-	storageManager.PutData(&model.Data{4, "Antonio", "AMTEK", model.Nine, model.LetterA})
-	storageManager.PutData(&model.Data{5, "Olga", "School 26", model.Ten, model.LetterA})
+	storageManager.PutData(&model.Data{ID: 4,
+		Pupil:         "Antonio",
+		Establishment: "AMTEK",
+		Class:         model.Nine,
+		Letter:        model.LetterA})
+
+	storageManager.PutData(&model.Data{ID: 5,
+		Pupil:         "Olga",
+		Establishment: "School 26",
+		Class:         model.Ten,
+		Letter:        model.LetterA})
 
 	terminated, err := storageManager.Terminate()
 	if err != nil {

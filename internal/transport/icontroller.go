@@ -4,7 +4,7 @@ import "time"
 
 type IController interface {
 	IsStorageReady() bool
-	PutObjectWithExpires(key int, value string, lifetime time.Duration) bool
-	PutObject(key int, value string) bool
-	GetObject(key int) (string, bool)
+	PutObjectWithExpires(key uint64, value []byte, lifetime time.Duration) (bool, error)
+	PutObject(key uint64, value []byte) (bool, error)
+	GetObject(key uint64) ([]byte, bool)
 }

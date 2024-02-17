@@ -21,9 +21,9 @@ func Put(controller transport.IController) http.HandlerFunc {
 			return
 		}
 
-		key := -1
+		var key uint64
 		var err error = nil
-		if key, err = strconv.Atoi(keyStr); err != nil {
+		if key, err = strconv.ParseUint(keyStr, 10, 64); err != nil {
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusBadRequest)
 			return
 		}
@@ -47,18 +47,18 @@ func Put(controller transport.IController) http.HandlerFunc {
 				return
 			}
 			lifetime := time.Duration(exp) * time.Millisecond
-			putStatus := controller.PutObjectWithExpires(key, string(reqData), lifetime)
+			putStatus, err := controller.PutObjectWithExpires(key, reqData, lifetime)
 			if putStatus {
 				w.WriteHeader(http.StatusOK)
 			} else {
-				http.Error(w, http.StatusText(http.StatusFound), http.StatusFound)
+				http.Error(w, err.Error(), http.StatusFound)
 			}
 		} else {
-			putStatus := controller.PutObject(key, string(reqData))
+			putStatus, err := controller.PutObject(key, reqData)
 			if putStatus {
 				w.WriteHeader(http.StatusOK)
 			} else {
-				http.Error(w, http.StatusText(http.StatusFound), http.StatusFound)
+				http.Error(w, err.Error(), http.StatusFound)
 			}
 		}
 	}
@@ -74,9 +74,9 @@ func Get(controller transport.IController) http.HandlerFunc {
 			return
 		}
 
-		key := -1
+		var key uint64
 		var err error = nil
-		if key, err = strconv.Atoi(keyStr); err != nil {
+		if key, err = strconv.ParseUint(keyStr, 10, 64); err != nil {
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusBadRequest)
 			return
 		}
