@@ -27,4 +27,7 @@ func initRouter(r *Router) {
 	// Reading objects from storage
 	r.MuxRouter.HandleFunc("/objects/{key}", Put(r.controller)).Methods("PUT")
 	r.MuxRouter.HandleFunc("/objects/{key}", Get(r.controller)).Methods("GET")
+
+	// Get metrics
+	HandleMetricsLogic(r.MuxRouter)
 }
