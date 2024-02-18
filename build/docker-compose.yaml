@@ -1,15 +1,20 @@
 version: '3'
 
 services:
-  database:
+  prometheus:
     build:
-      dockerfile: database/Dockerfile
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      dockerfile: prometheus/Dockerfile
     ports:
-      - "5432:5432"
+      - "19090:9090"
+  # database:
+  #   build:
+  #     dockerfile: database/Dockerfile
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: postgres
+  #   ports:
+  #     - "5432:5432"
     
   # golang_part:
   #   build:
