@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  prometheus:
+    build:
+      dockerfile: build/prometheus/Dockerfile
+    ports:
+      - "19090:9090"
+  database:
+    build:
+      dockerfile: build/database/Dockerfile
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    
+  golang_part:
+    build:
+      dockerfile: build/service/Dockerfile
+    tty: true
+    depends_on:
+      - database
+    deploy:
+      restart_policy:
+        condition: any

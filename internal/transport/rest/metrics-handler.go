@@ -60,14 +60,14 @@ func prometheusMiddleware(next http.Handler) http.Handler {
 
 // Function for handle getting metrics logic
 func HandleMetricsLogic(mux *mux.Router) {
-	// Register custim metrics
+	// Register custom metrics
 	prometheus.Register(totalRequests)
 	prometheus.Register(responseStatus)
 	prometheus.Register(httpDuration)
 
-	// Use sutom MiddlewareFunc
+	// Use custom MiddlewareFunc
 	mux.Use(prometheusMiddleware)
 
 	// Prometheus endpoint
-	mux.Path("/prometheus").Handler(promhttp.Handler())
+	mux.Path("/metrics").Handler(promhttp.Handler())
 }
